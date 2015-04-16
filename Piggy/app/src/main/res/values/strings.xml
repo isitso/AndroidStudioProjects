@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">PairODice</string>
+    <string name="roll">Roll!</string>
+    <string name="player2">Player 2</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_player2">Player2</string>
+    <string name="hello_world">Hello world!</string>
+
+</resources>
