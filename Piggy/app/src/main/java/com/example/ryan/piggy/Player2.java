@@ -57,6 +57,25 @@ public class Player2 extends ActionBarActivity {
                     current += val1 + val2;
                     TextView t = (TextView)findViewById(R.id.currentTextView);
                     t.setText(String.valueOf(current));
+                    if ((current + total) >= 100) {     // You won
+                        AlertDialog alertDialog = new AlertDialog.Builder(Player2.this).create();
+                        alertDialog.setTitle("You win!");
+                        alertDialog.setMessage("Total score: " + (total + current));
+                        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                        Intent intent = new Intent(Player2.this,MainActivity.class);
+
+                                        // Reset the game
+                                        intent.putExtra("score2", 0);
+                                        intent.putExtra("score1", 0);
+                                        intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                                        startActivity(intent);
+                                    }
+                                });
+                        alertDialog.show();
+                    }
                 }
             }
         });
