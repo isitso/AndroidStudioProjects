@@ -33,14 +33,13 @@ public class MainActivity extends ActionBarActivity {
         for (int i = 0; i < 16; i++) {
             bList[i] = new Button(this);
             bList[i].setText(bStr[i]);
-//            bList[i].getLayoutParams().width = 200;
-//            bList[i].getLayoutParams().height = 200;
             bLayout.addView(bList[i], 250, 250);
             bList[i].setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Button b = (Button)v;
                     et.append(b.getText());
+                    bHandler(b.getText().toString());
                 }
             });
         }
@@ -57,13 +56,31 @@ public class MainActivity extends ActionBarActivity {
                 ||s.equalsIgnoreCase("8") || s.equalsIgnoreCase("9"))
             et.append(s);       // Button pressed was a digit
         else if (s.equalsIgnoreCase("+") || s.equalsIgnoreCase("/") || s.equalsIgnoreCase("*")){
-            if (gotNum){
+            String tmp = et.getText().toString();
+            if (tmp.charAt(tmp.length() -1) != ')' || tmp.charAt(tmp.length()-1) < '0' || tmp.charAt(tmp.length()-1) > '9' )
+                return;     // An Operation must follow a number
+            if (!gotNum){
                 num1 = Double.parseDouble(et.getText().toString());
-                expr.setNum1(num1)
+                expr.setNum1(num1);
                 expr.setOp(s);
+                gotNum = true;
+                gotOp = true;
+            }else{  // I got my num1, now get num2
+                // should i solve the previous op before doing anything else?
+                num2 = Double.parseDouble(et.getText().toString());
+                Expr tmpE = expr.getResult();
+                expr.setNum1(tmpE.getNum1());
+                expr.setOp(s);
+                gotNum = true;
                 gotOp = true;
             }
-        }else if (s.equalsIgnoreCase())
+        }else if (s.equalsIgnoreCase("=")){
+            // get my result and display it
+            Expr rE = expr.getResult();
+            et.setText(String.valueOf(rE.getNum1()));
+            gotNum = false;
+            gotOp = false;
+        }
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
