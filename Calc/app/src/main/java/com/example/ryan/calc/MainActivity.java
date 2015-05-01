@@ -1,5 +1,6 @@
 package com.example.ryan.calc;
 
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -9,11 +10,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridLayout;
 
-
 public class MainActivity extends ActionBarActivity {
 
     final String[] bStr = {"7", "8", "9", "/", "4", "5", "6", "x", "1", "2", "3", "-", ".", "0", "=", "+"};
     EditText et;
+    Expr expr;
+    double num1, num2;
+    boolean gotNum, gotOp;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,8 +44,27 @@ public class MainActivity extends ActionBarActivity {
                 }
             });
         }
+
+        // Expression
+        expr = new Expr();
     }
 
+    // Handle buttons
+    public void bHandler(String s){
+
+        if (s.equalsIgnoreCase("0") || s.equalsIgnoreCase("1") || s.equalsIgnoreCase("2") || s.equalsIgnoreCase("3")
+                || s.equalsIgnoreCase("4") || s.equalsIgnoreCase("5") || s.equalsIgnoreCase("6") || s.equalsIgnoreCase("7")
+                ||s.equalsIgnoreCase("8") || s.equalsIgnoreCase("9"))
+            et.append(s);       // Button pressed was a digit
+        else if (s.equalsIgnoreCase("+") || s.equalsIgnoreCase("/") || s.equalsIgnoreCase("*")){
+            if (gotNum){
+                num1 = Double.parseDouble(et.getText().toString());
+                expr.setNum1(num1)
+                expr.setOp(s);
+                gotOp = true;
+            }
+        }else if (s.equalsIgnoreCase())
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -60,6 +82,9 @@ public class MainActivity extends ActionBarActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
+        }else if (id == R.id.extra){
+            Intent intent = new Intent(MainActivity.this, Extra.class);
+            startActivity(intent);
         }
 
         return super.onOptionsItemSelected(item);
