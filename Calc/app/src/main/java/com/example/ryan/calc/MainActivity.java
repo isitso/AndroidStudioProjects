@@ -10,13 +10,19 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridLayout;
 
+import java.math.BigDecimal;
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Stack;
+
 public class MainActivity extends ActionBarActivity {
 
-    final String[] bStr = {"7", "8", "9", "/", "4", "5", "6", "x", "1", "2", "3", "-", ".", "0", "=", "+"};
+    final String[] bStr = {"7", "8", "9", "/", "4", "5", "6", "*", "1", "2", "3", "-", ".", "0", "=", "+"};
     EditText et;
-    Expr expr;
+    String exprStr;
     double num1, num2;
-    boolean gotNum, gotOp;
+    boolean gotNum, gotOp, gotDot;
+    Stack<String> input;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,55 +44,102 @@ public class MainActivity extends ActionBarActivity {
                 @Override
                 public void onClick(View v) {
                     Button b = (Button)v;
-                    et.append(b.getText());
+                    //et.append(b.getText());
                     bHandler(b.getText().toString());
                 }
             });
         }
+        final Button delButton = (Button)findViewById(R.id.delB);
+        delButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){delHandler();}
+        });
+        input = new Stack<String>();
+        exprStr = "";
+    }
 
-        // Expression
-        expr = new Expr();
+    // Handle Del button
+    public void delHandler(){
+        if (!input.empty()) {
+            int id = exprStr.lastIndexOf(input.pop());
+            if (id > -1)
+                exprStr = exprStr.substring(0, id);
+            et.setText(exprStr);
+        }else
+            et.setText("");
+    }
+
+    // Generate stack from string
+    public void getInputStack(String s){
+        String[] tmp = s.split(" ");
+        input = new Stack<String>();
+        for (String x : tmp) {
+            if (x.equalsIgnoreCase("e"))
+                input.push(String.valueOf(Math.E));
+            else if (x.equalsIgnoreCase("pi"))
+                input.push(String.valueOf(Math.PI));
+            else if (!x.isEmpty())
+                input.push(x);
+        }
     }
 
     // Handle buttons
     public void bHandler(String s){
 
-        if (s.equalsIgnoreCase("0") || s.equalsIgnoreCase("1") || s.equalsIgnoreCase("2") || s.equalsIgnoreCase("3")
-                || s.equalsIgnoreCase("4") || s.equalsIgnoreCase("5") || s.equalsIgnoreCase("6") || s.equalsIgnoreCase("7")
-                ||s.equalsIgnoreCase("8") || s.equalsIgnoreCase("9"))
-            et.append(s);       // Button pressed was a digit
-        else if (s.equalsIgnoreCase("+") || s.equalsIgnoreCase("/") || s.equalsIgnoreCase("*")){
-            String tmp = et.getText().toString();
-            if (tmp.charAt(tmp.length() -1) != ')' || tmp.charAt(tmp.length()-1) < '0' || tmp.charAt(tmp.length()-1) > '9' )
-                return;     // An Operation must follow a number
-            if (!gotNum){
-                num1 = Double.parseDouble(et.getText().toString());
-                expr.setNum1(num1);
-                expr.setOp(s);
-                gotNum = true;
-                gotOp = true;
-            }else{  // I got my num1, now get num2
-                // should i solve the previous op before doing anything else?
-                num2 = Double.parseDouble(et.getText().toString());
-                Expr tmpE = expr.getResult();
-                expr.setNum1(tmpE.getNum1());
-                expr.setOp(s);
-                gotNum = true;
-                gotOp = true;
+        if (Expr.isOp(s)) {
+            if  (!input.empty() && Expr.isNum(input.peek())) {
+                input.push(s);
+                exprStr += " " + s + " ";
             }
-        }else if (s.equalsIgnoreCase("=")){
-            // get my result and display it
-            Expr rE = expr.getResult();
-            et.setText(String.valueOf(rE.getNum1()));
-            gotNum = false;
-            gotOp = false;
+        }else if (Expr.isNum(s)) {
+            if (input.empty() || (Expr.isOp(input.peek())) || input.peek().equalsIgnoreCase("("))
+                input.push(s);
+            else if (Expr.isNum(input.peek()) || input.peek().equalsIgnoreCase(".")) {
+                String tmp = input.pop() + s;
+                input.push(tmp);
+            }
+            exprStr += s;
+        }else if (s.equalsIgnoreCase(".")){
+            if (input.empty() || Expr.isOp(input.peek())) {
+                    input.push(".");
+                    exprStr += ".";
+            }else if ( Expr.isNum(input.peek())){
+                if (Expr.isNum(input.peek() + ".")){
+                    String tmp = input.pop();
+                    input.push(tmp + ".");
+                    exprStr += ".";
+                }
+            }
         }
+
+        // http://technopaper.blogspot.com/2009/06/converting-double-to-string-without-e.html
+        if (s.equalsIgnoreCase("=")) {
+            NumberFormat nf = NumberFormat.getInstance();
+            nf.setGroupingUsed(false);
+            String tmp = "";
+            while (!input.empty())
+                tmp = input.pop() + " " + tmp;
+            et.setText(nf.format(new Expr().evaluate(tmp)));
+            exprStr = "";
+            input.clear();
+        }else
+            et.setText(exprStr);
+
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Intent intent = getIntent();
+        exprStr = (intent.getStringExtra("expr") != null) ?  intent.getStringExtra("expr") : "";
+        getInputStack(exprStr);
+        et.setText(exprStr);
     }
 
     @Override
@@ -101,6 +154,7 @@ public class MainActivity extends ActionBarActivity {
             return true;
         }else if (id == R.id.extra){
             Intent intent = new Intent(MainActivity.this, Extra.class);
+            intent.putExtra("expr", exprStr);
             startActivity(intent);
         }
 

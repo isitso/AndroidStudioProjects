@@ -10,10 +10,16 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridLayout;
 
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Stack;
+
 
 public class Extra extends ActionBarActivity {
-    final String[] bStr = {"sin", "cos", "tan", "?", "ln", "log", "pi", "e", "%", "!", "sqrt", "^", "(", ")", "", ""};
+    final String[] bStr = {"sin", "cos", "tan", "", "ln", "log", "pi", "e", "%", "!", "sqrt", "^", "(", ")", "", ""};
     EditText et;
+    String exprStr;
+    Stack<String> input;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,10 +42,87 @@ public class Extra extends ActionBarActivity {
                 @Override
                 public void onClick(View v) {
                     Button b = (Button)v;
-                    et.append(b.getText());
+                    bHandler(b.getText().toString());
                 }
             });
         }
+
+        final Button delButton = (Button)findViewById(R.id.delB);
+        delButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){delHandler();}
+        });
+
+        // Get values passed from main activity
+        Intent intent = getIntent();
+        exprStr = (intent.getStringExtra("expr") != null) ? intent.getStringExtra("expr") : "";
+        getInputStack(exprStr);
+        et.setText(exprStr);
+    }
+
+    // Handle Del button
+    public void delHandler(){
+        if (!input.empty()) {
+            int id = exprStr.lastIndexOf(input.pop());
+            if (id > -1)
+                exprStr = exprStr.substring(0, id);
+            et.setText(exprStr);
+        }else
+            et.setText("");
+    }
+
+    // Generate stack from string
+    public void getInputStack(String s){
+        String[] tmp = s.split(" ");
+        input = new Stack<String>();
+        for (String x : tmp) {
+            if (x.equalsIgnoreCase("e"))
+                input.push(String.valueOf(Math.E));
+            else if (x.equalsIgnoreCase("pi"))
+                input.push(String.valueOf(Math.PI));
+            else if (!x.isEmpty())
+                input.push(x);
+        }
+    }
+    // Handle buttons
+    public void bHandler(String s){
+        if (Expr.isFunction(s)){    // sin, cos, tan, ln, log
+            // they must follow an op, cannot be a number
+            if (input.empty() || (Expr.isOp(input.peek()) || input.peek().equalsIgnoreCase("("))) {  // good, go ahead and add them
+                input.push(s);
+                input.push("(");
+                exprStr += " " + s + " (" + " ";
+            }
+        }else if (Expr.isOp(s)) {
+            if  (!input.empty() && Expr.isNum(input.peek())) {
+                input.push(s);
+                exprStr += " " + s + " ";
+            }
+        }else if (s.equalsIgnoreCase("(") ||s.equalsIgnoreCase(")")){
+            input.push(s);
+            exprStr += " " + s + " ";
+        }else if (s.equalsIgnoreCase("e")) {
+            if (input.empty() || (Expr.isOp(input.peek())) || input.peek().equalsIgnoreCase("(")){
+                input.push(String.valueOf(Math.E));
+                exprStr += " " + s + " ";
+            }
+        }else if (s.equalsIgnoreCase("pi")){
+            if (input.empty() || (Expr.isOp(input.peek())) || input.peek().equalsIgnoreCase("(")){
+                input.push(String.valueOf(Math.PI));
+                exprStr += " " + s + " ";
+            }
+        }
+
+        et.setText(exprStr);
+
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Intent intent = getIntent();
+        exprStr = intent.getStringExtra("expr");
+        getInputStack(exprStr);
+        et.setText(exprStr);
     }
 
     @Override
@@ -61,6 +144,7 @@ public class Extra extends ActionBarActivity {
             return true;
         }else if (id == R.id.basic){
             Intent intent = new Intent(Extra.this, MainActivity.class);
+            intent.putExtra("expr", exprStr);
             startActivity(intent);
         }
 

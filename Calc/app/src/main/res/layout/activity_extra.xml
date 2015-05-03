@@ -30,6 +30,7 @@
             android:layout_width="250px"
             android:layout_height="250px"
             android:text="Del"
+            android:id="@+id/delB"
             android:layout_alignParentRight="true"/>
     </RelativeLayout>
 
