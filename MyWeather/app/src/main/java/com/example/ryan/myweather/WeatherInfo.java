@@ -12,81 +12,69 @@ import java.util.ArrayList;
 public class WeatherInfo {
 
     // JSON Fields
-    String base, name;
-    double dt;
-    long id, cod;
-    Coord coord;
-    Sys sys;
-    ArrayList<Weather> weather;
-    Main main;
-    Wind wind;
-    Cloud clouds;
-    Rain rain;
+    double dt, message;
+    long cod, cnt;
+    ArrayList<Info> info_list;
+    City city;
 
     public WeatherInfo(JSONObject json_weather) throws JSONException{
 
-        // coords
-        JSONObject tmp_coord = json_weather.optJSONObject("coord");
-        this.coord = new Coord();
-        this.coord.lat = tmp_coord.optLong("lat");
-        this.coord.lon = tmp_coord.optLong("lon");
-
-        // sys
-        JSONObject tmp_sys = json_weather.optJSONObject("sys");
-        this.sys = new Sys();
-        this.sys.message = tmp_sys.optString("message");
-        this.sys.country = tmp_sys.optString("country");
-        this.sys.sunrise = tmp_sys.optLong("sunrise");
-        this.sys.sunset = tmp_sys.optLong("sunset");
-
-        // weather - this should be an arraylist
-        JSONArray array_weather = json_weather.optJSONArray("weather");
-        this.weather = new ArrayList<Weather>();
-        //JSONObject tmp_weather = json_weather.optJSONObject("weather");
-        for (int i = 0; i < array_weather.length(); i++){
-            JSONObject tmp_json_weather = array_weather.getJSONObject(i);
-            Weather tmp_weather = new Weather();
-            tmp_weather.id = tmp_json_weather.optLong("id");
-            tmp_weather.main = tmp_json_weather.optString("main");
-            tmp_weather.description = tmp_json_weather.optString("description");
-            tmp_weather.icon = tmp_json_weather.optString("icon");
-            this.weather.add(tmp_weather);
-        }
-
-        // base
-        this.base = json_weather.optString("base");
-
-        // main
-        JSONObject tmp_main = json_weather.optJSONObject("main");
-        this.main = new Main();
-        this.main.temp = tmp_main.optDouble("temp");
-        this.main.temp_min = tmp_main.optDouble("temp_min");
-        this.main.temp_max = tmp_main.optDouble("temp_max");
-        this.main.pressure = tmp_main.optDouble("pressure");
-        this.main.sea_level = tmp_main.optDouble("sea_level");
-        this.main.grnd_level = tmp_main.optDouble("grnd_level");
-        this.main.humidity = tmp_main.optDouble("humidity");
-
-        // wind
-        JSONObject tmp_wind = json_weather.optJSONObject("wind");
-        this.wind = new Wind();
-        this.wind.speed = tmp_wind.optDouble("speed");
-        this.wind.deg = tmp_wind.optDouble("deg");
-
-        // clouds
-        JSONObject tmp_clouds = json_weather.optJSONObject("clouds");
-        this.clouds = new Cloud();
-        this.clouds.all = tmp_clouds.optLong("all");
-
-        // rain
-        JSONObject tmp_rain = json_weather.optJSONObject("rain");
-        this.rain = new Rain();
-        this.rain.three_h = tmp_rain.optDouble("3h");
-
+        // get information from json
         this.dt = json_weather.optLong("dt");
-        this.id = json_weather.optLong("id");
-        this.name = json_weather.optString("name");
         this.cod = json_weather.optLong("cod");
+        this.message = json_weather.optDouble("message");
+        this.cnt = json_weather.optLong("cnt");
+
+        // city
+        city = new City();
+        JSONObject json_city = json_weather.getJSONObject("city");
+        city.id = json_city.optLong("id");
+        city.name = json_city.optString("name");
+        city.coord = new Coord();
+        city.country = json_city.optString("country");
+        city.population = json_city.optLong("population");
+        JSONObject json_coord = json_city.getJSONObject("coord");
+        city.coord.lat = json_coord.optDouble("lat");
+        city.coord.lon = json_coord.optDouble("lon");
+
+
+        // info list: 10 days
+        info_list = new ArrayList<Info>();
+        JSONArray info_json_array = json_weather.optJSONArray("list");
+        for (int i = 0; i < info_json_array.length(); i++){
+            Info tmp_info = new Info();
+            JSONObject json_info = info_json_array.getJSONObject(i);
+            tmp_info.dt = json_info.optLong("dt");
+
+            tmp_info.temp = new Temp();
+            JSONObject json_temp = json_info.optJSONObject("temp");
+            tmp_info.temp.day = json_temp.optDouble("day");
+            tmp_info.temp.min = json_temp.optDouble("min");
+            tmp_info.temp.max = json_temp.optDouble("max");
+            tmp_info.temp.night = json_temp.optDouble("night");
+            tmp_info.temp.eve = json_temp.optDouble("eve");
+            tmp_info.temp.morn = json_temp.optDouble("morn");
+
+            tmp_info.pressure = json_info.optDouble("pressure");
+            tmp_info.humidity = json_info.optLong("humidity");
+
+            // weather: should have only 1 item
+            tmp_info.weather_list = new ArrayList<Weather>();
+            JSONArray json_w_array = json_info.getJSONArray("weather");
+            for (int j = 0; j < json_w_array.length(); j++){
+                Weather tmp_weather = new Weather();
+                JSONObject json_w = json_w_array.getJSONObject(i);
+                tmp_weather.id = json_w.optLong("id");
+                tmp_weather.main = json_w.optString("main");
+                tmp_weather.description = json_w.optString("description");
+                tmp_weather.icon = json_w.optString("icon");
+                tmp_info.weather_list.add(tmp_weather);
+            }
+
+            tmp_info.speed = json_info.optDouble("speed");
+            tmp_info.deg = json_info.optLong("deg");
+            tmp_info.clouds = json_info.optLong("clouds");
+        }
 
     }
 
@@ -96,34 +84,32 @@ public class WeatherInfo {
     Helper classes
      *===================================================*/
     public class Coord{
-        public long lon, lat;
+        public double lon, lat;
     }
 
-    public class Sys{
-        public String message, country;
-        public long sunrise, sunset;
-    }
 
     public class Weather{
         public long id;
         public String main, description, icon;
     }
 
-    public class Main{
-        public double temp, temp_min, temp_max, pressure, sea_level, grnd_level, humidity;
+
+
+    public class City{
+        long id, population;
+        String name, country;
+        Coord coord;
+
     }
 
-    public class Wind{
-        public double speed, deg;
+    public class Temp{
+        double day, min, max, night, eve, morn;
     }
 
-    public class Cloud{
-        public long all;
+    public class Info{
+        long dt, humidity, deg, clouds;
+        Temp temp;
+        double pressure, speed, rain;
+        ArrayList<Weather> weather_list;
     }
-
-    public class Rain{
-        public double three_h;
-    }
-
-
 }
