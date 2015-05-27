@@ -1,17 +1,29 @@
 package com.example.ryan.myweather;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ProgressBar;
 
 
 public class MainActivity extends ActionBarActivity {
+
+    ProgressBar pb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        pb = (ProgressBar)findViewById(R.id.progressBar);
+        pb.setMax(100);
+        if (isOnline())
+            pb.setProgress(50);
+
     }
 
     @Override
@@ -34,5 +46,12 @@ public class MainActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    // check for internet connection
+    public boolean isOnline(){
+        ConnectivityManager cm =(ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo ni = cm.getActiveNetworkInfo();
+        return (ni != null && ni.isConnected());
     }
 }
