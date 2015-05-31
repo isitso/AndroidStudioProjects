@@ -9,6 +9,8 @@ import java.util.ArrayList;
 /**
  * Created by Ryan on 5/27/2015.
  */
+
+
 public class WeatherInfo {
 
     // JSON Fields
@@ -63,7 +65,7 @@ public class WeatherInfo {
             JSONArray json_w_array = json_info.getJSONArray("weather");
             for (int j = 0; j < json_w_array.length(); j++){
                 Weather tmp_weather = new Weather();
-                JSONObject json_w = json_w_array.getJSONObject(i);
+                JSONObject json_w = json_w_array.getJSONObject(j);
                 tmp_weather.id = json_w.optLong("id");
                 tmp_weather.main = json_w.optString("main");
                 tmp_weather.description = json_w.optString("description");
@@ -76,8 +78,13 @@ public class WeatherInfo {
             tmp_info.clouds = json_info.optLong("clouds");
         }
 
-    }
 
+    }
+    public static ArrayList<Info> getInfoList(String weather_str) throws JSONException{
+        JSONObject data = new JSONObject(weather_str);
+        WeatherInfo wi = new WeatherInfo(data);
+        return wi.info_list;
+    }
 
 
     /*==================================================

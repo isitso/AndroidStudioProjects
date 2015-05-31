@@ -1,12 +1,16 @@
 package com.example.ryan.myweather;
 
-import android.app.Activity;
-import android.net.Uri;
+
 import android.os.Bundle;
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+
+import java.util.ArrayList;
 
 
 /**
@@ -17,78 +21,35 @@ import android.view.ViewGroup;
  * Use the {@link WeatherFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class WeatherFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+public class WeatherFragment extends Fragment implements AdapterView.OnItemClickListener {
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    // weather
+    WeatherInfo mWeatherInfo;   // ArrayList<Info> info_list holds list of weathers
+    ArrayList<WeatherInfo.Info> info;
 
-    private OnFragmentInteractionListener mListener;
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment WeatherFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static WeatherFragment newInstance(String param1, String param2) {
-        WeatherFragment fragment = new WeatherFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    public WeatherFragment() {
-        // Required empty public constructor
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-    }
-
+    String[] titles;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_weather, container, false);
+        View v = inflater.inflate(R.layout.fragment_weather, container, false);
+        MainActivity activity = (MainActivity) this.getActivity();
+        info = activity.getWeather();
+        if (info != null) {
+            titles = new String[info.size()];
+            for (int i = 0; i < info.size(); i++)
+                titles[i] = info.get(i).weather_list.get(0).main;
+        }
+
+        ListView lv = (ListView) v.findViewById(R.id.listView);
+        lv.setAdapter(new ArrayAdapter<String>(this.getActivity(), R.layout.abc_list_menu_item_layout, titles));
+        return v;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mListener = (OnFragmentInteractionListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
     }
 
     /**
@@ -101,9 +62,4 @@ public class WeatherFragment extends Fragment {
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        public void onFragmentInteraction(Uri uri);
-    }
-
 }

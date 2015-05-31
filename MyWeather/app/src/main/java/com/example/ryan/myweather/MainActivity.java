@@ -4,6 +4,8 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,6 +15,8 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import org.json.JSONException;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,12 +25,13 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.util.ArrayList;
 
 
 public class MainActivity extends ActionBarActivity {
 
     ProgressBar pb;
-
+    ArrayList<WeatherInfo.Info> info;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -124,6 +129,7 @@ public class MainActivity extends ActionBarActivity {
                     }
                     String weather_data = sb.toString();
                     Log.d(Constants.TAG, weather_data);
+                    info = WeatherInfo.getInfoList(weather_data);
                     return 0l;
                 }else
                     return 1l;
@@ -134,10 +140,26 @@ public class MainActivity extends ActionBarActivity {
             } catch (IOException e) {
                 e.printStackTrace();
                 return 1l;
-            }finally {  // close the connection
+            } catch (JSONException e) {
+                e.printStackTrace();
+                return 1l;
+            } finally {  // close the connection
                 if (c != null)
                     c.disconnect();
             }
         }
+    }
+
+    public ArrayList<WeatherInfo.Info> getWeather(){
+        return info;
+    }
+
+    public void showList(){
+        FragmentManager fm = getSupportFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+        WeatherFragment fragment = new WeatherFragment();
+        ft.add(R.id.container, fragment);
+        ft.commit();
+
     }
 }
