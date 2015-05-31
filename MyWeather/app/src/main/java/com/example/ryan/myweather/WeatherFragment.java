@@ -3,6 +3,7 @@ package com.example.ryan.myweather;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,12 +38,15 @@ public class WeatherFragment extends Fragment implements AdapterView.OnItemClick
         info = activity.getWeather();
         if (info != null) {
             titles = new String[info.size()];
-            for (int i = 0; i < info.size(); i++)
+            Log.d(Constants.TAG, "info's size = " + info.size());
+            for (int i = 0; i < info.size(); i++) {
                 titles[i] = info.get(i).weather_list.get(0).main;
+                Log.d(Constants.TAG, "added to titles array: " + titles[i]);
+            }
         }
 
         ListView lv = (ListView) v.findViewById(R.id.listView);
-        lv.setAdapter(new ArrayAdapter<String>(this.getActivity(), R.layout.abc_list_menu_item_layout, titles));
+        lv.setAdapter(new ArrayAdapter<String>(this.getActivity(), android.R.layout.simple_list_item_1, titles));
         return v;
     }
 

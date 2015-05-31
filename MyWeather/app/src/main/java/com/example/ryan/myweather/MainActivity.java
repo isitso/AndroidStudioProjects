@@ -31,7 +31,7 @@ import java.util.ArrayList;
 public class MainActivity extends ActionBarActivity {
 
     ProgressBar pb;
-    ArrayList<WeatherInfo.Info> info;
+    ArrayList<WeatherInfo.Info> mInfo;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,7 +84,7 @@ public class MainActivity extends ActionBarActivity {
      ==============================================*/
     private class LoadWeather extends AsyncTask<String, Long, Long>{
         HttpURLConnection c;
-        WeatherInfo wi;
+        ArrayList<WeatherInfo.Info> info;
 
         @Override
         protected void onPreExecute() {
@@ -101,6 +101,8 @@ public class MainActivity extends ActionBarActivity {
         protected void onPostExecute(Long aLong) {
             if (aLong != 1l){
                 Log.d(Constants.TAG, "Got my result");
+                setWeatherInfo(info);
+                showList();
             }else{
                 Toast.makeText(getApplicationContext(), "Background Task failed", Toast.LENGTH_LONG).show();
             }
@@ -110,7 +112,6 @@ public class MainActivity extends ActionBarActivity {
         @Override
         protected Long doInBackground(String... params) {
             String api_str = "http://api.openweathermap.org/data/2.5/forecast/daily?lat=35&lon=139&cnt=10&mode=json";
-
             try{
                 URL data_url = new URL(api_str);
                 c = (HttpURLConnection)data_url.openConnection();
@@ -151,15 +152,18 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public ArrayList<WeatherInfo.Info> getWeather(){
-        return info;
+        return mInfo;
     }
 
     public void showList(){
         FragmentManager fm = getSupportFragmentManager();
         FragmentTransaction ft = fm.beginTransaction();
-        WeatherFragment fragment = new WeatherFragment();
-        ft.add(R.id.container, fragment);
+        ft.add(R.id.container, new WeatherFragment());
         ft.commit();
 
+    }
+
+    public void setWeatherInfo (ArrayList<WeatherInfo.Info> info){
+        this.mInfo = info;
     }
 }
