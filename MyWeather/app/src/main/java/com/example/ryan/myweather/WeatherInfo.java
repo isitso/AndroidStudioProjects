@@ -76,6 +76,8 @@ public class WeatherInfo {
             tmp_info.speed = json_info.optDouble("speed");
             tmp_info.deg = json_info.optLong("deg");
             tmp_info.clouds = json_info.optLong("clouds");
+
+            info_list.add(tmp_info);
         }
 
 
