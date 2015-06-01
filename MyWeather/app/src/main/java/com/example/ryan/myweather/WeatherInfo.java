@@ -18,6 +18,7 @@ public class WeatherInfo {
     long cod, cnt;
     ArrayList<Info> info_list;
     City city;
+    ArrayList<SimpleWeather> simple_weather_list;
 
     public WeatherInfo(JSONObject json_weather) throws JSONException{
 
@@ -78,8 +79,18 @@ public class WeatherInfo {
             tmp_info.clouds = json_info.optLong("clouds");
 
             info_list.add(tmp_info);
+
         }
 
+        simple_weather_list = new ArrayList<SimpleWeather>();
+        SimpleWeather simple_weather = new SimpleWeather();
+        for (int i = 0; i < info_list.size(); i++){
+            simple_weather.main = info_list.get(i).weather_list.get(0).main;
+            simple_weather.desc = info_list.get(i).weather_list.get(0).description;
+            simple_weather.temp_high = info_list.get(i).temp.max;
+            simple_weather.temp_low = info_list.get(i).temp.min;
+            simple_weather_list.add(simple_weather);
+        }
 
     }
     public static ArrayList<Info> getInfoList(String weather_str) throws JSONException{
@@ -88,6 +99,12 @@ public class WeatherInfo {
         return wi.info_list;
     }
 
+    //
+    public static ArrayList<SimpleWeather> getSimpleWeatherList(String weather_str) throws JSONException{
+        JSONObject data = new JSONObject(weather_str);
+        WeatherInfo wi = new WeatherInfo(data);
+        return  wi.simple_weather_list;
+    }
 
     /*==================================================
     Helper classes
@@ -121,4 +138,9 @@ public class WeatherInfo {
         double pressure, speed, rain;
         ArrayList<Weather> weather_list;
     }
+
+    /*
+    Simple version: contains fewer fields. just enough to use in the app
+     */
+
 }

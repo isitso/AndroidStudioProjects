@@ -1,6 +1,7 @@
 package com.example.ryan.myweather;
 
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -32,6 +33,8 @@ public class MainActivity extends ActionBarActivity {
 
     ProgressBar pb;
     ArrayList<WeatherInfo.Info> mInfo;
+
+    DBHelper mydb;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,6 +42,8 @@ public class MainActivity extends ActionBarActivity {
 
         pb = (ProgressBar)findViewById(R.id.progressBar);
         pb.setMax(100);
+        //SQLiteDatabase db = openOrCreateDatabase(Constants.DB_NAME, MODE_PRIVATE, null);
+        mydb = new DBHelper(this);
         if (isOnline()) {
             pb.setProgress(50);
             LoadWeather task = new LoadWeather();
@@ -131,6 +136,7 @@ public class MainActivity extends ActionBarActivity {
                     String weather_data = sb.toString();
                     Log.d(Constants.TAG, weather_data);
                     info = WeatherInfo.getInfoList(weather_data);
+                    mydb.insertWeathers(WeatherInfo.getSimpleWeatherList(weather_data));    // insert into db
                     return 0l;
                 }else
                     return 1l;
@@ -166,4 +172,7 @@ public class MainActivity extends ActionBarActivity {
     public void setWeatherInfo (ArrayList<WeatherInfo.Info> info){
         this.mInfo = info;
     }
+
+
+
 }
