@@ -12,7 +12,10 @@ public class Constants {
             + "temp_high real, temp_low real);";
     public static final String DROP_SQL = "drop table if exists weathers";
     public static final String GET_SQL = "select * from weathers where id=";
-    public static final String GET_ALL_SQL = "select * from weathers;";
+
+    // http://stackoverflow.com/questions/3359414/android-column-id-does-not-exist
+    // SimpleCursorAdapter requires that the Cursor's result set must include a column named exactly "_id".
+    public static final String GET_ALL_SQL = "select rowid _id, * from weathers;";
     public static final String DELETE_ALL_SQL = "delete * from weathers";
 
     public static final String MAIN_KEY = "main";

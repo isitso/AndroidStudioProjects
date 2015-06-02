@@ -1,7 +1,10 @@
 package com.example.ryan.myweather;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -10,10 +13,15 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.CursorAdapter;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONException;
@@ -33,7 +41,7 @@ public class MainActivity extends ActionBarActivity {
 
     ProgressBar pb;
     ArrayList<WeatherInfo.Info> mInfo;
-
+    WeatherAdapter mWeatherAdapter;
     DBHelper mydb;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -156,7 +164,9 @@ public class MainActivity extends ActionBarActivity {
             }
         }
     }
-
+    public Cursor getCursor(){
+        return mydb.getAll();
+    }
     public ArrayList<WeatherInfo.Info> getWeather(){
         return mInfo;
     }

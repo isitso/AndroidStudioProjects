@@ -64,6 +64,12 @@ public class DBHelper extends SQLiteOpenHelper {
         return c;
     }
 
+    public Cursor getAll(){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(Constants.GET_ALL_SQL, null);
+        return c;
+
+    }
     public ArrayList<SimpleWeather> getWeatherList(){
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor c = db.rawQuery(Constants.GET_ALL_SQL, null);
@@ -79,4 +85,5 @@ public class DBHelper extends SQLiteOpenHelper {
         }
         return list;
     }
+
 }

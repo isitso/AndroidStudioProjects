@@ -1,6 +1,7 @@
 package com.example.ryan.myweather;
 
 
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -45,8 +46,11 @@ public class WeatherFragment extends Fragment implements AdapterView.OnItemClick
             }
         }
 
+        Cursor c = activity.getCursor();
+
         ListView lv = (ListView) v.findViewById(R.id.listView);
-        lv.setAdapter(new ArrayAdapter<String>(this.getActivity(), android.R.layout.simple_list_item_1, titles));
+        WeatherAdapter wa = new WeatherAdapter(activity, c);
+        lv.setAdapter(wa);
         return v;
     }
 
