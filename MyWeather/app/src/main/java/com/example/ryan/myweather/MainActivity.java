@@ -41,7 +41,6 @@ public class MainActivity extends ActionBarActivity {
 
     ProgressBar pb;
     ArrayList<WeatherInfo.Info> mInfo;
-    WeatherAdapter mWeatherAdapter;
     DBHelper mydb;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -182,7 +181,5 @@ public class MainActivity extends ActionBarActivity {
     public void setWeatherInfo (ArrayList<WeatherInfo.Info> info){
         this.mInfo = info;
     }
-
-
 
 }

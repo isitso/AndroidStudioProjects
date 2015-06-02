@@ -1,5 +1,7 @@
 package com.example.ryan.myweather;
 
+import android.util.Log;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -83,12 +85,14 @@ public class WeatherInfo {
         }
 
         simple_weather_list = new ArrayList<SimpleWeather>();
-        SimpleWeather simple_weather = new SimpleWeather();
+
         for (int i = 0; i < info_list.size(); i++){
+            SimpleWeather simple_weather = new SimpleWeather();
             simple_weather.main = info_list.get(i).weather_list.get(0).main;
             simple_weather.desc = info_list.get(i).weather_list.get(0).description;
             simple_weather.temp_high = info_list.get(i).temp.max;
             simple_weather.temp_low = info_list.get(i).temp.min;
+            Log.d(Constants.TAG, "generate simpleweather - current sw: " + simple_weather.main + " " + simple_weather.temp_high + " " + simple_weather.temp_low);
             simple_weather_list.add(simple_weather);
         }
 

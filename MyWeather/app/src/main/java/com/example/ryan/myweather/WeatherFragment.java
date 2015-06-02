@@ -47,9 +47,10 @@ public class WeatherFragment extends Fragment implements AdapterView.OnItemClick
         }
 
         Cursor c = activity.getCursor();
-
+        c.moveToFirst();
+        Log.d(Constants.TAG, "cursor count: " + c.getCount());
         ListView lv = (ListView) v.findViewById(R.id.listView);
-        WeatherAdapter wa = new WeatherAdapter(activity, c);
+        WeatherAdapter wa = new WeatherAdapter(activity, c, 0);
         lv.setAdapter(wa);
         return v;
     }

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -47,27 +48,28 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL(Constants.DROP_SQL);
         db.execSQL(Constants.CREATE_SQL);
-        ContentValues cv = new ContentValues();
+
 
         for (SimpleWeather sw : list){
+            ContentValues cv = new ContentValues();
             cv.put(Constants.MAIN_KEY, sw.main);
             cv.put(Constants.DESCRIPTION_KEY, sw.desc);
             cv.put(Constants.TEMP_HIGH_KEY, sw.temp_high);
             cv.put(Constants.TEMP_LOW_KEY, sw.temp_low);
+            Log.d(Constants.TAG, "inserting into db: " + sw.main + " " + sw.temp_high + " " + sw.temp_low);
             db.insert(Constants.TABLE_NAME, null, cv);
         }
         return bool;
     }
     public Cursor getData(int id){
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.rawQuery(Constants.GET_SQL + id, null);
-        return c;
+        return db.rawQuery(Constants.GET_SQL + id, null);
     }
 
     public Cursor getAll(){
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.rawQuery(Constants.GET_ALL_SQL, null);
-        return c;
+        return db.rawQuery(Constants.GET_ALL_SQL, null);
+
 
     }
     public ArrayList<SimpleWeather> getWeatherList(){
