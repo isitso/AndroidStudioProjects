@@ -1,13 +1,21 @@
 package com.example.ryan.myweather;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.provider.Settings;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
@@ -35,13 +43,17 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Locale;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements LocationListener{
 
     ProgressBar pb;
     ArrayList<WeatherInfo.Info> mInfo;
     DBHelper mydb;
+    LocationManager lm;
+    Location loc;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,8 +65,38 @@ public class MainActivity extends ActionBarActivity {
         mydb = new DBHelper(this);
         if (isOnline()) {
             pb.setProgress(50);
-            LoadWeather task = new LoadWeather();
-            task.execute();
+            // check for GPS
+            lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+
+            if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+                // ask for GPS
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage("This app need to use the GPS. Turn it on?").setCancelable(false).setPositiveButton("Yes",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                            }
+                        }).setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+                AlertDialog alert = builder.create();
+                alert.show();
+            }
+
+            // get location
+            loc = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            if (loc != null && loc.getTime() > Calendar.getInstance().getTimeInMillis() - Constants.LAST_LOCATION_TIME){
+                // usable location
+                Log.d(Constants.TAG, "Using old location");
+                loadWeather();
+            }else{
+                lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, this);
+            }
+
         }else{
             pb.setVisibility(View.GONE);
             Toast.makeText(this, "Not Online", Toast.LENGTH_LONG).show();
@@ -91,6 +133,34 @@ public class MainActivity extends ActionBarActivity {
         return (ni != null && ni.isConnected());
     }
 
+    @Override
+    public void onLocationChanged(Location location) {
+        Geocoder geo = new Geocoder(getBaseContext(), Locale.CANADA.getDefault());
+        loc = location;
+        lm.removeUpdates(this); // remove listener
+        loadWeather();
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+
+    }
+
+    public void loadWeather(){
+        // get weather information from openweather
+        LoadWeather task = new LoadWeather();
+        task.execute();
+    }
     /*=============================================
     helper class to load weather in background
      ==============================================*/
@@ -123,7 +193,10 @@ public class MainActivity extends ActionBarActivity {
 
         @Override
         protected Long doInBackground(String... params) {
-            String api_str = "http://api.openweathermap.org/data/2.5/forecast/daily?lat=35&lon=139&cnt=10&mode=json";
+            double lat = loc.getLatitude();
+            double lon = loc.getLongitude();
+            String api_str = "http://api.openweathermap.org/data/2.5/forecast/daily?lat=" + String.valueOf((int)lat)
+                    + "&lon=" + String.valueOf((int)lon) + "&cnt=10&mode=json";
             try{
                 URL data_url = new URL(api_str);
                 c = (HttpURLConnection)data_url.openConnection();
@@ -163,6 +236,7 @@ public class MainActivity extends ActionBarActivity {
             }
         }
     }
+
     public Cursor getCursor(){
         return mydb.getAll();
     }
@@ -181,5 +255,6 @@ public class MainActivity extends ActionBarActivity {
     public void setWeatherInfo (ArrayList<WeatherInfo.Info> info){
         this.mInfo = info;
     }
+
 
 }

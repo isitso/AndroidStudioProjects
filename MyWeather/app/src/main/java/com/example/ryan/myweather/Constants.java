@@ -23,4 +23,5 @@ public class Constants {
     public static final String TEMP_HIGH_KEY = "temp_high";
     public static final String TEMP_LOW_KEY = "temp_low";
 
+    public static final int LAST_LOCATION_TIME = 2 * 60 * 1000; // 2 minutes
 }
